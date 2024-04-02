@@ -29,7 +29,8 @@ const static uint64_t pageSize = 1UL << pageBits;
 /* Page tables contain 2^10 entries and are 2^12 bytes in size.
  * log2(sizeof(TableEntry)) = 2.
  */
-const static uint64_t pageTableAlign = 1UL << (addressSpaceBits - pageBits + 2);
+// const static uint64_t pageTableAlign = 1UL << (addressSpaceBits - pageBits + 2);
+const static uint64_t pageTableAlign = pageSize;
 
 
 struct __attribute__ ((__packed__)) TableEntry

@@ -35,8 +35,7 @@ getAddress(TableEntry &entry)
  * organizing the page tables.
  */
 
-// const static uint64_t entries = 1UL << (addressSpaceBits - pageBits);
-const static uint64_t entries = 2; // DELETE THIS: TEMPORARILY SET TO 2 FOR SIMPLE IMPLEMENTATION PLEASE DONT FORGET :)
+const static uint64_t entries = 1UL << (addressSpaceBits - pageBits);
 
 AArch64MMUDriver::AArch64MMUDriver()
   : pageTables(), bytesAllocated(0), kernel(nullptr)
@@ -66,17 +65,25 @@ AArch64MMUDriver::getPageSize(void) const
 void
 AArch64MMUDriver::allocatePageTable(const uint64_t PID)
 {
-  TableEntry *table = reinterpret_cast<TableEntry *>
-      (kernel->allocateMemory(entries * sizeof(TableEntry), pageTableAlign));
-  bytesAllocated += entries * sizeof(TableEntry);
+  int entriesTable0 = 2;
+  int entriesNextTables = 2048;
+  TableEntry *table0 = reinterpret_cast<TableEntry *> (kernel->allocateMemory(entriesTable0 * sizeof(TableEntry), pageTableAlign));
+  TableEntry *table1 = reinterpret_cast<TableEntry *> (kernel->allocateMemory(entriesNextTables * sizeof(TableEntry), pageTableAlign));
+  TableEntry *table2 = reinterpret_cast<TableEntry *> (kernel->allocateMemory(entriesNextTables * sizeof(TableEntry), pageTableAlign));
+  TableEntry *table3 = reinterpret_cast<TableEntry *> (kernel->allocateMemory(entriesNextTables * sizeof(TableEntry), pageTableAlign));
+  bytesAllocated += (entriesTable0 + 3 * entriesNextTables) * sizeof(TableEntry);
 
   for (int i = 0; i < (int)entries; ++i)
     {
-      table[i].valid = 0;
-      table[i].dirty = 0;
+      table3[i].valid = 1;
+      table3[i].dirty = 0;
     }
 
-  pageTables.emplace(PID, table);
+  pageTables.emplace(PID, table0);
+  pageTables.emplace(PID, table1);
+  pageTables.emplace(PID, table2);
+  pageTables.emplace(PID, table3);
+
 }
 
 void
