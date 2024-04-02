@@ -1,19 +1,19 @@
 /* pagetables -- A framework to experiment with memory management
  *
- *    simple.h - A simple, single level page table to serve as example.
+ *    AArch64.h - A AArch64, 4-level page table to serve as example.
  *
  * Copyright (C) 2017-2020 Leiden University, The Netherlands.
  */
 
-#ifndef __ARCH_SIMPLE__
-#define __ARCH_SIMPLE__
+#ifndef __ARCH_AARCH64__
+#define __ARCH_AARCH64__
 
 #include "mmu.h"
 #include "oskernel.h"
 
 #include <map>
 
-namespace Simple {
+namespace AArch64 {
 
 /* Like in x86_64, we consider that only 48 bits of the virtual address
  * may be used.
@@ -43,23 +43,18 @@ struct __attribute__ ((__packed__)) TableEntry
 
   uint16_t reserved : 13;
 
-  /* In the initial implementation of "simple" it was decided that the
-   * physical (output) address is 40 bits in size. This limits the amount
-   * of physical memory to 1 TiB. With a page offset of 26 bits, this
-   * results in a physical page number of 14 bits.
-   */
   uint16_t physicalPage : 14;
 };
 
 /*
- * MMU hardware part (arch/simple/mmu.cc)
+ * MMU hardware part (arch/AArch64/mmu.cc)
  */
 
-class SimpleMMU : public MMU
+class AArch64MMU : public MMU
 {
   public:
-    SimpleMMU();
-    virtual ~SimpleMMU();
+    AArch64MMU();
+    virtual ~AArch64MMU();
 
     virtual uint8_t getPageBits(void) const override
     {
@@ -83,10 +78,10 @@ class SimpleMMU : public MMU
 
 
 /*
- * OS driver part (arch/simple/driver.cc)
+ * OS driver part (arch/AArch64/driver.cc)
  */
 
-class SimpleMMUDriver : public MMUDriver
+class AArch64MMUDriver : public MMUDriver
 {
   protected:
     std::map<uint64_t, TableEntry *> pageTables;
@@ -94,8 +89,8 @@ class SimpleMMUDriver : public MMUDriver
     OSKernel *kernel;  /* no ownership */
 
   public:
-    SimpleMMUDriver();
-    virtual ~SimpleMMUDriver() override;
+    AArch64MMUDriver();
+    virtual ~AArch64MMUDriver() override;
 
     virtual void      setHostKernel(OSKernel *kernel) override;
 
@@ -115,10 +110,10 @@ class SimpleMMUDriver : public MMUDriver
     virtual uint64_t  getBytesAllocated(void) const override;
 
     /* Disallow objects from being copied, since it has a pointer member. */
-    SimpleMMUDriver(const SimpleMMUDriver &driver) = delete;
-    void operator=(const SimpleMMUDriver &driver) = delete;
+    AArch64MMUDriver(const AArch64MMUDriver &driver) = delete;
+    void operator=(const AArch64MMUDriver &driver) = delete;
 };
 
-} /* namespace Simple */
+} /* namespace AArch64 */
 
-#endif /* __ARCH_SIMPLE__ */
+#endif /* __ARCH_AARCH64__ */

@@ -1,13 +1,13 @@
 /* pagetables -- A framework to experiment with memory management
  *
- *    simple/driver.cc - A simple, single level page table to serve as
+ *    AArch64/driver.cc - A AArch64, 4-level page table to serve as
  *                       example. OS driver part.
  *
  * Copyright (C) 2017-2020  Leiden University, The Netherlands.
  */
 
-#include "simple.h"
-using namespace Simple;
+#include "AArch64.h"
+using namespace AArch64;
 
 #include <iostream>
 
@@ -37,12 +37,12 @@ getAddress(TableEntry &entry)
 
 const static int entries = 1 << (addressSpaceBits - pageBits);
 
-SimpleMMUDriver::SimpleMMUDriver()
+AArch64MMUDriver::AArch64MMUDriver()
   : pageTables(), bytesAllocated(0), kernel(nullptr)
 {
 }
 
-SimpleMMUDriver::~SimpleMMUDriver()
+AArch64MMUDriver::~AArch64MMUDriver()
 {
   if (not pageTables.empty())
     std::cerr << "MMUDriver: error: kernel did not release all page tables."
@@ -51,19 +51,19 @@ SimpleMMUDriver::~SimpleMMUDriver()
 
 
 void
-SimpleMMUDriver::setHostKernel(OSKernel *kernel)
+AArch64MMUDriver::setHostKernel(OSKernel *kernel)
 {
   this->kernel = kernel;
 }
 
 uint64_t
-SimpleMMUDriver::getPageSize(void) const
+AArch64MMUDriver::getPageSize(void) const
 {
   return pageSize;
 }
 
 void
-SimpleMMUDriver::allocatePageTable(const uint64_t PID)
+AArch64MMUDriver::allocatePageTable(const uint64_t PID)
 {
   TableEntry *table = reinterpret_cast<TableEntry *>
       (kernel->allocateMemory(entries * sizeof(TableEntry), pageTableAlign));
@@ -79,7 +79,7 @@ SimpleMMUDriver::allocatePageTable(const uint64_t PID)
 }
 
 void
-SimpleMMUDriver::releasePageTable(const uint64_t PID)
+AArch64MMUDriver::releasePageTable(const uint64_t PID)
 {
   auto it = pageTables.find(PID);
   kernel->releaseMemory(it->second, entries * sizeof(TableEntry));
@@ -87,7 +87,7 @@ SimpleMMUDriver::releasePageTable(const uint64_t PID)
 }
 
 uintptr_t
-SimpleMMUDriver::getPageTable(const uint64_t PID)
+AArch64MMUDriver::getPageTable(const uint64_t PID)
 {
   auto kv = pageTables.find(PID);
   if (kv == pageTables.end())
@@ -97,7 +97,7 @@ SimpleMMUDriver::getPageTable(const uint64_t PID)
 }
 
 void
-SimpleMMUDriver::setMapping(const uint64_t PID,
+AArch64MMUDriver::setMapping(const uint64_t PID,
                             uintptr_t vAddr,
                             PhysPage &pPage)
 {
@@ -111,13 +111,13 @@ SimpleMMUDriver::setMapping(const uint64_t PID,
 }
 
 uint64_t
-SimpleMMUDriver::getBytesAllocated(void) const
+AArch64MMUDriver::getBytesAllocated(void) const
 {
   return bytesAllocated;
 }
 
 void
-SimpleMMUDriver::setPageValid(PhysPage &pPage, bool setting)
+AArch64MMUDriver::setPageValid(PhysPage &pPage, bool setting)
 {
   TableEntry *entry = reinterpret_cast<TableEntry *>(pPage.driverData);
   if (not entry->valid)

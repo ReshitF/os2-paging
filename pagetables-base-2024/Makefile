@@ -40,11 +40,14 @@ OS_OBJS = \
 	os/oskernel.o
 
 ARCH_HEADERS = \
-	arch/include/simple.h
+	arch/include/simple.h	\
+	arch/include/AArch64.h
 
 ARCH_OBJS = \
 	arch/simple/driver.o	\
-	arch/simple/mmu.o
+	arch/simple/mmu.o		\
+	arch/AArch64/driver.o	\
+	arch/AArch64/mmu.o
 
 
 OBJS = \

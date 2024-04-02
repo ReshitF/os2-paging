@@ -1,29 +1,29 @@
 /* pagetables -- A framework to experiment with memory management
  *
- *    simple/mmu.cc - A simple, single level page table to serve as
+ *    AArch64/mmu.cc - A AArch64, 4-level page table to serve as
  *                    example. Hardware MMU part.
  *
  * Copyright (C) 2017-2020  Leiden University, The Netherlands.
  */
 
-#include "simple.h"
-using namespace Simple;
+#include "AArch64.h"
+using namespace AArch64;
 
 /*
  * MMU part. The MMU simply performs a walk of the page table and
  * attempts the translation from a virtual to a physical address.
  */
 
-SimpleMMU::SimpleMMU()
+AArch64MMU::AArch64MMU()
 {
 }
 
-SimpleMMU::~SimpleMMU()
+AArch64MMU::~AArch64MMU()
 {
 }
 
 bool
-SimpleMMU::performTranslation(const uint64_t vPage,
+AArch64MMU::performTranslation(const uint64_t vPage,
                               uint64_t &pPage,
                               bool isWrite)
 {

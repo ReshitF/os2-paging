@@ -14,6 +14,7 @@
 #include "settings.h"
 
 #include "simple.h"
+#include "AArch64.h"
 
 uint64_t MemorySize = 1 * 1024 * 1024; /* Default to 1024 * 1024 KiB = 1 GiB */
 
@@ -134,8 +135,7 @@ main(int argc, char **argv)
       if (useSimple)
         run<Simple::SimpleMMU, Simple::SimpleMMUDriver>(MemorySize << 10, processList);
       else if (useAArch64)
-        /* TODO: add run<> call for your page table implementation here. */
-        exitWithError(progName, "Error: AArch64 not yet implemented.\n\n");
+        run<AArch64::AArch64MMU, AArch64::AArch64MMUDriver>(MemorySize << 10, processList);
       else
         exitWithError(progName, "Error: unknown page table type specified.\n\n");
     }
