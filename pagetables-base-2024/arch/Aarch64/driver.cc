@@ -35,7 +35,8 @@ getAddress(TableEntry &entry)
  * organizing the page tables.
  */
 
-const static int entries = 1 << (addressSpaceBits - pageBits);
+// const static uint64_t entries = 1UL << (addressSpaceBits - pageBits);
+const static uint64_t entries = 2; // DELETE THIS: TEMPORARILY SET TO 2 FOR SIMPLE IMPLEMENTATION PLEASE DONT FORGET :)
 
 AArch64MMUDriver::AArch64MMUDriver()
   : pageTables(), bytesAllocated(0), kernel(nullptr)
@@ -69,7 +70,7 @@ AArch64MMUDriver::allocatePageTable(const uint64_t PID)
       (kernel->allocateMemory(entries * sizeof(TableEntry), pageTableAlign));
   bytesAllocated += entries * sizeof(TableEntry);
 
-  for (int i = 0; i < entries; ++i)
+  for (int i = 0; i < (int)entries; ++i)
     {
       table[i].valid = 0;
       table[i].dirty = 0;

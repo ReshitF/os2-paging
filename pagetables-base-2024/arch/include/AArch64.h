@@ -23,10 +23,10 @@ const static uint64_t addressSpaceBits = 48;
 
 /* Table entry definitions and assorted constants. */
 
-const static uint64_t pageBits = 26; /* 64 MiB / page */
+const static uint64_t pageBits = 14; /* 16 KiB / page */
 const static uint64_t pageSize = 1UL << pageBits;
 
-/* Page tables contain 2^22 entries and are 2^24 bytes in size.
+/* Page tables contain 2^10 entries and are 2^12 bytes in size.
  * log2(sizeof(TableEntry)) = 2.
  */
 const static uint64_t pageTableAlign = 1UL << (addressSpaceBits - pageBits + 2);
@@ -43,7 +43,7 @@ struct __attribute__ ((__packed__)) TableEntry
 
   uint16_t reserved : 13;
 
-  uint16_t physicalPage : 14;
+  uint64_t physicalPage : 34;
 };
 
 /*
