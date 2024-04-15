@@ -37,15 +37,24 @@ AArch64MMU::performTranslation(const uint64_t vPage,
   const uint64_t level_1 = (vPage >> 22) & mask;  // bits 22-32
   const uint64_t level_0 = (vPage >> 33) & 1;     // bit 33
 
-  TableEntry *table_0 = reinterpret_cast<TableEntry *>(root);
-  TableEntry *table_1 = reinterpret_cast<TableEntry *>( &table_0[level_0] ); 
-  TableEntry *table_2 = reinterpret_cast<TableEntry *>( &table_1[level_1] );  
-  TableEntry *table_3 = reinterpret_cast<TableEntry *>( &table_2[level_2] );  
-
-  if (not table_3[level_3].valid)
+  
+  TableEntry *Table_0 = reinterpret_cast<TableEntry*>(root);
+  if (Table_0[level_0].valid == 0)
     return false;
 
-  pPage = table_3[level_3].physicalPage;
+  TableEntry *Table_1 = reinterpret_cast<TableEntry*>(Table_0[level_0].physicalPage << pageBits);
+  if (Table_1[level_1].valid == 0)
+    return false;
+
+  TableEntry *Table_2 = reinterpret_cast<TableEntry*>(Table_1[level_1].physicalPage << pageBits);
+  if (Table_2[level_2].valid == 0)
+    return false;
+
+  TableEntry *Table_3 = reinterpret_cast<TableEntry*>(Table_2[level_2].physicalPage << pageBits);
+  if (Table_3[level_3].valid == 0)
+    return false;
+
+  pPage = Table_3[level_3].physicalPage;
 
   return true;
 }

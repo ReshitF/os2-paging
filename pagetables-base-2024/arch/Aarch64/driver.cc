@@ -100,7 +100,7 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
                             uintptr_t vAddr,
                             PhysPage &pPage)
 {
-  std::cout << "Starting SetMapping\n";
+  std::cout << "Starting SetMapping: ";
   /* Ensure unused address bits are zero */
   vAddr &= (1UL << addressSpaceBits) - 1;
   const uint64_t vPage = vAddr >> pageBits;
@@ -109,25 +109,43 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
   const uint64_t level_2 = (vPage >> 11) & mask;  // bits 11-21
   const uint64_t level_1 = (vPage >> 22) & mask;  // bits 22-32
   const uint64_t level_0 = (vPage >> 33) & 1;     // bit 33 
-  if (pageTables[PID][level_0].dirty == 0){
-     // doe wat
-     TableEntry *table = reinterpret_cast<TableEntry *>
+
+  TableEntry *Table_0 = pageTables[PID];
+  if (Table_0[level_0].valid == 0){
+    TableEntry *table = reinterpret_cast<TableEntry *>
       (kernel->allocateMemory(2048 * sizeof(TableEntry), pageTableAlign));
-    table[412].dirty = 1;
-    pageTables[PID][level_0].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
-
-    
-    TableEntry *temp = reinterpret_cast<TableEntry *>(pageTables[PID][level_0].physicalPage << pageBits);
-    std::cout << "Our set dirty bit: " << (int)temp[412].dirty << "\n";
-    std::cout << "NOT Our set dirty bit: " << (int)temp[410].dirty << "\n";
-
-  } else {
-    std::cout << "Valid was true\n";
-    TableEntry *nextLevel = reinterpret_cast<TableEntry *>(pageTables[PID][level_0].physicalPage);
+    bytesAllocated += 2048 * sizeof(TableEntry);
+    Table_0[level_0].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
+    Table_0[level_0].valid = 1;
+    std::cout << "0, ";
   }
+  
+  TableEntry *Table_1 = reinterpret_cast<TableEntry*>(Table_0[level_0].physicalPage << pageBits);
+  if (Table_1[level_1].valid == 0){
+    TableEntry *table = reinterpret_cast<TableEntry *>
+      (kernel->allocateMemory(2048 * sizeof(TableEntry), pageTableAlign));
+    bytesAllocated += 2048 * sizeof(TableEntry);
+    Table_1[level_1].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
+    Table_1[level_1].valid = 1;
+    std::cout << "1, ";
+  }
+  TableEntry *Table_2 = reinterpret_cast<TableEntry*>(Table_1[level_1].physicalPage << pageBits);
 
-  initPageTableEntry(pageTables[PID][0], pPage.addr);
-  pPage.driverData = &pageTables[PID][0];
+  if (Table_2[level_2].valid == 0){
+    TableEntry *table = reinterpret_cast<TableEntry *>
+      (kernel->allocateMemory(2048 * sizeof(TableEntry), pageTableAlign));
+    bytesAllocated += 2048 * sizeof(TableEntry);
+    Table_2[level_2].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
+    Table_2[level_2].valid = 1;
+    std::cout << "2, ";
+  }
+  TableEntry *Table_3 = reinterpret_cast<TableEntry*>(Table_2[level_2].physicalPage << pageBits);
+
+  if (Table_3[level_3].valid == 0){
+    initPageTableEntry(Table_3[level_3], pPage.addr);
+    pPage.driverData = &Table_3[level_3];
+    std::cout << "3\n";
+  }
 }
 
 uint64_t
