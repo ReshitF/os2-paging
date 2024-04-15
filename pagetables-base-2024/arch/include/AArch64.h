@@ -42,7 +42,7 @@ struct __attribute__ ((__packed__)) TableEntry
   uint8_t dirty : 1;
   uint8_t referenced : 1;
 
-  uint16_t reserved : 13;
+  uint32_t reserved : 25;
 
   uint64_t physicalPage : 34;
 };

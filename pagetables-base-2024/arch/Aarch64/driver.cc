@@ -68,6 +68,7 @@ AArch64MMUDriver::allocatePageTable(const uint64_t PID)
   TableEntry *table = reinterpret_cast<TableEntry *>
       (kernel->allocateMemory(2 * sizeof(TableEntry), pageTableAlign));
   bytesAllocated += sizeof(table);
+  std::cout << "TABLE ENTRY SIZE: " << sizeof(TableEntry) << "\n";
 
   for (int i = 0; i < 2; ++i) {
     table[i].valid = 0;
@@ -80,8 +81,37 @@ AArch64MMUDriver::allocatePageTable(const uint64_t PID)
 void
 AArch64MMUDriver::releasePageTable(const uint64_t PID)
 {
+  // const uint64_t level_3 = vPage & mask;          // bits 0-10
+  // const uint64_t level_2 = (vPage >> 11) & mask;  // bits 11-21
+  // const uint64_t level_1 = (vPage >> 22) & mask;  // bits 22-32
+  // const uint64_t level_0 = (vPage >> 33) & 1;     // bit 33 
+
+  for (int it0 = 0; it0 < 2; it0++){
+    TableEntry *Table_0 = pageTables[PID];
+    if (Table_0[it0].valid == 1){
+      TableEntry *Table_1 = reinterpret_cast<TableEntry*>(Table_0[it0].physicalPage << pageBits);
+      for (int it1 = 0; it1 < 2048; it1++){
+        if (Table_1[it1].valid == 1){
+          TableEntry *Table_2 = reinterpret_cast<TableEntry*>(Table_1[it1].physicalPage << pageBits);
+          for (int it2 = 0; it2 < 2048; it2++){
+            if (Table_2[it2].valid == 1){
+              // TableEntry *Table_3 = reinterpret_cast<TableEntry*>(Table_2[it2].physicalPage << pageBits);
+              // for (int it3 = 0; it3 < 2048; it3++){
+              //   if (Table_3[it3].valid == 1){
+              //     kernel->releaseMemory(Table_3[it3], 1 * sizeof(TableEntry));
+              //   }
+              // }
+              kernel->releaseMemory(reinterpret_cast<void*>(Table_2[it2].physicalPage << pageBits), 2048 * sizeof(TableEntry));
+            }
+          }
+          kernel->releaseMemory(reinterpret_cast<void*>(Table_1[it1].physicalPage << pageBits), 2048 * sizeof(TableEntry));
+        }
+      }
+      kernel->releaseMemory(reinterpret_cast<void*>(Table_0[it0].physicalPage << pageBits), 2048*sizeof(TableEntry));
+    }
+  }
   auto it = pageTables.find(PID);
-  kernel->releaseMemory(it->second, entries * sizeof(TableEntry));
+  kernel->releaseMemory(it->second, 2 * sizeof(TableEntry));
   pageTables.erase(it);
 }
 
