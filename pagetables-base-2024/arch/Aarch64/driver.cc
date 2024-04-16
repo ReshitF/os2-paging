@@ -94,7 +94,7 @@ AArch64MMUDriver::releasePageTable(const uint64_t PID)
               TableEntry *Table_3 = reinterpret_cast<TableEntry*>(Table_2[it2].physicalPage << pageBits);
               for (int it3 = 0; it3 < 2048; it3++){
                 if (Table_3[it3].valid == 1){
-                  kernel->releaseMemory(Table_3[it3], 1 * sizeof(TableEntry));
+                  kernel->releaseMemory(reinterpret_cast<void*>(Table_3[it3].physicalPage), 1 * sizeof(TableEntry));
                 }
               }
               kernel->releaseMemory(reinterpret_cast<void*>(Table_2[it2].physicalPage << pageBits), 2048 * sizeof(TableEntry));
