@@ -91,14 +91,13 @@ AArch64MMUDriver::releasePageTable(const uint64_t PID)
           TableEntry *Table_2 = reinterpret_cast<TableEntry*>(Table_1[it1].physicalPage << pageBits);
           for (int it2 = 0; it2 < 2048; it2++){
             if (Table_2[it2].valid == 1){
-              //laatste level ook vrijgeven, onnodig als we optimalisatie zouden implementeren van mem manager
-              // TableEntry *Table_3 = reinterpret_cast<TableEntry*>(Table_2[it2].physicalPage << pageBits);
-              // for (int it3 = 0; it3 < 2048; it3++){
-              //   if (Table_3[it3].valid == 1){
-              //     std::cout << "loop3\n";
-              //     kernel->releaseMemory(reinterpret_cast<void*>(Table_3[it3].physicalPage), 1 * sizeof(TableEntry));
-              //   }
-              // }
+              TableEntry *Table_3 = reinterpret_cast<TableEntry*>(Table_2[it2].physicalPage << pageBits);
+              for (int it3 = 0; it3 < 2048; it3++){
+                if (Table_3[it3].valid == 1){
+                  kernel->releaseMemory(reinterpret_cast<void*>(&Table_3[it3]), 1 * sizeof(TableEntry));
+                  counter++;
+                }
+              }
               // std::cout << "loop2\n";
               counter++;
               kernel->releaseMemory(reinterpret_cast<void*>(Table_2[it2].physicalPage << pageBits), 2048 * sizeof(TableEntry));
@@ -114,10 +113,11 @@ AArch64MMUDriver::releasePageTable(const uint64_t PID)
       kernel->releaseMemory(reinterpret_cast<void*>(Table_0[it0].physicalPage << pageBits), 2048*sizeof(TableEntry));
     }
   }
-  std::cout << "Counter: " << counter << "\n";
   auto it = pageTables.find(PID);
   kernel->releaseMemory(it->second, 2 * sizeof(TableEntry));
+  counter++;
   pageTables.erase(it);
+  std::cout << "Counter: " << counter << "\n";
 }
 
 uintptr_t
