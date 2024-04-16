@@ -77,7 +77,8 @@ PhysMemManager::allocatePages(size_t count, uintptr_t &addr)
               addr = (uintptr_t)baseAddress + start * pageSize;
               nAllocatedPages += count;
               maxAllocatedPages = std::max(maxAllocatedPages, nAllocatedPages);
-
+              
+              printf("allocated pages: %ld", nAllocatedPages);
               return true;
             }
         }
@@ -103,6 +104,7 @@ PhysMemManager::releasePages(uintptr_t addr, size_t count)
 bool
 PhysMemManager::allReleased(void) const
 {
+  printf("allocated pages: %ld", nAllocatedPages);
   return nAllocatedPages == 0;
 }
 
