@@ -124,7 +124,6 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
                             uintptr_t vAddr,
                             PhysPage &pPage)
 {
-  // std::cout << "Starting SetMapping: ";
   /* Ensure unused address bits are zero */
   vAddr &= (1UL << addressSpaceBits) - 1;
   const uint64_t vPage = vAddr >> pageBits;
@@ -141,7 +140,6 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
     bytesAllocated += entries * sizeof(TableEntry);
     Table_0[level_0].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
     Table_0[level_0].valid = 1;
-    // std::cout << "0, ";
   }
   
   TableEntry *Table_1 = reinterpret_cast<TableEntry*>(Table_0[level_0].physicalPage << pageBits);
@@ -151,7 +149,6 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
     bytesAllocated += entries * sizeof(TableEntry);
     Table_1[level_1].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
     Table_1[level_1].valid = 1;
-    // std::cout << "1, ";
   }
   TableEntry *Table_2 = reinterpret_cast<TableEntry*>(Table_1[level_1].physicalPage << pageBits);
 
@@ -161,14 +158,12 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
     bytesAllocated += entries * sizeof(TableEntry);
     Table_2[level_2].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
     Table_2[level_2].valid = 1;
-    // std::cout << "2, ";
   }
   TableEntry *Table_3 = reinterpret_cast<TableEntry*>(Table_2[level_2].physicalPage << pageBits);
 
   if (Table_3[level_3].valid == 0){
     initPageTableEntry(Table_3[level_3], pPage.addr);
     pPage.driverData = &Table_3[level_3];
-    // std::cout << "3\n";
   }
 }
 

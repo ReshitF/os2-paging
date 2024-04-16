@@ -34,13 +34,14 @@ class TLB
     int nFlush;
     int nFlushEvictions;
                           //PID       vPage     pPage
-    std::vector<std::tuple<uint64_t, uint64_t, uint64_t>> Buffer;
+    // std::vector<std::tuple<uint64_t, uint64_t, uint64_t>> Buffer;
     uint64_t ASID = 0;
     bool ASIDEnabled = true;
 
   public:
     TLB(const size_t nEntries, const MMU &mmu);
     ~TLB();
+    std::vector<std::tuple<uint64_t, uint64_t, uint64_t>> Buffer;
 
     /* This method should lookup the virtual page number to a physical page number */
     bool lookup(const uint64_t vPage, uint64_t &pPage);
@@ -71,11 +72,12 @@ class MMU
   protected:
     uintptr_t root;
     PageFaultFunction pageFaultHandler;
-    TLB tlb;
+    // TLB tlb;
 
   public:
     MMU();
     virtual ~MMU();
+    TLB tlb;
 
     void initialize(PageFaultFunction pageFaultHandler);
     void setPageTablePointer(const uintptr_t root);

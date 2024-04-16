@@ -60,7 +60,8 @@ OBJS = \
 TESTS =	\
 	tests/physmemmanager	\
 	tests/simple			\
-	tests/aarch64
+	tests/aarch64			\
+	tests/tlb
 
 TEST_OBJS =	\
 	$(HW_OBJS)	\

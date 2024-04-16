@@ -83,8 +83,6 @@ MMU::getTranslation(const MemAccess &access, uint64_t &pAddr)
   bool isWrite = (access.type == MemAccessType::Store ||
                   access.type == MemAccessType::Modify);
 
-  /* TODO: your TLB likely needs to be glued in somewhere in this method */
-  // zit dit adres al in de TLB?
   if (tlb.lookup(vPage, pPage)){
     pAddr = makePhysicalAddr(access, pPage);
     return true;
