@@ -187,6 +187,12 @@ OSKernel::interruptHandler(InterruptRequest request)
         {
           uintptr_t table = driver.getPageTable(current->getPID());
           processor.getMMU().setPageTablePointer(table);
+          // Set ASID for TLB, and flush if necessary
+          processor.getMMU().setASIDEnabled(true);
+          processor.getMMU().setASID(current->getPID());
+          if (!processor.getMMU().getASIDEnabled()){
+            processor.getMMU().flush();
+          }
         }
 
       processor.setProcess(current);

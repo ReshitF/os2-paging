@@ -62,7 +62,7 @@ AArch64MMU::performTranslation(const uint64_t vPage,
 TLB::TLB(const size_t nEntries, const MMU &mmu):
           nEntries(nEntries), mmu(mmu), nLookups(0),
           nHits(0), nEvictions(0), nFlush(0), nFlushEvictions(0),
-          temp({})
+          Buffer({})
 {
 }
 
@@ -71,26 +71,65 @@ TLB::~TLB(){
 
 bool
 TLB::lookup(const uint64_t vPage, uint64_t &pPage){
-  return true;
+  nLookups++;
+  for (int i = Buffer.size()-1; i >= 0; i--){
+    if (std::get<0>(Buffer[i]) == ASID && std::get<1>(Buffer[i]) == vPage){
+      pPage = std::get<2>(Buffer[i]);
+      // Found element is used, so is moved to back (most recently used)
+      Buffer.push_back(Buffer[i]);
+      Buffer.erase(Buffer.begin()+i);
+      nHits++;
+      return true;
+    }
+  }
+  return false;
 }
 
 void
 TLB::add(const uint64_t vPage, const uint64_t pPage){
-
+  std::tuple<uint64_t,uint64_t,uint64_t> newEntry = std::make_tuple(ASID, vPage, pPage);
+  if (Buffer.size() == nEntries){
+    nEvictions++;
+    Buffer.erase(Buffer.begin());
+  }
+  Buffer.push_back(newEntry);
 }
 
 void
 TLB::flush(void){
-
+  nFlush++;
+  nFlushEvictions += Buffer.size();
+  Buffer.clear();
 }
 
 void
 TLB::clear(void){
-
+  flush();
+  nLookups = 0;
+  nHits = 0;
+  nEvictions = 0;
+  nFlush = 0;
+  nFlushEvictions = 0;
+  ASID = 0;
 }
 
 void
 TLB::getStatistics(int &nLookups, int &nHits, int &nEvictions,
-                       int &nFlush, int &nFlushEvictions) const{
+                       int &nFlush, int &nFlushEvictions) const
+{
+  nLookups = this->nLookups;
+  nHits = this->nHits;
+  nEvictions = this->nEvictions;
+  nFlush = this->nFlush;
+  nFlushEvictions = this->nFlushEvictions;
+}
 
+void
+TLB::setASID(uint64_t newASID){
+  this->ASID = newASID;
+}
+
+void
+TLB::setASIDEnabled(bool enable){
+  this->ASIDEnabled = enable;
 }

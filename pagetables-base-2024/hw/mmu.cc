@@ -11,7 +11,7 @@
 #include <iostream>
 
 MMU::MMU()
-  : root(0x0), pageFaultHandler()
+  : root(0x0), pageFaultHandler(), tlb(TLB(TLBEntries, *this))
 {
 }
 
@@ -84,11 +84,18 @@ MMU::getTranslation(const MemAccess &access, uint64_t &pAddr)
                   access.type == MemAccessType::Modify);
 
   /* TODO: your TLB likely needs to be glued in somewhere in this method */
-  if (performTranslation(vPage, pPage, isWrite))
+  // zit dit adres al in de TLB?
+  if (tlb.lookup(vPage, pPage)){
+    pAddr = makePhysicalAddr(access, pPage);
+    return true;
+  } else {
+    if (performTranslation(vPage, pPage, isWrite))
     {
+      tlb.add(vPage, pPage);
       pAddr = makePhysicalAddr(access, pPage);
       return true;
     }
+  }
 
   return false;
 }
@@ -100,4 +107,5 @@ MMU::getTLBStatistics(int &nLookups, int &nHits, int &nEvictions,
   /* TODO: connect this to your TLB implementation to fill in the
    * appropriate values for the statistics.
    */
+  tlb.getStatistics(nLookups, nHits, nEvictions, nFlush, nFlushEvictions);
 }

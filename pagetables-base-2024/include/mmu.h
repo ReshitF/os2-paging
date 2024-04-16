@@ -33,7 +33,10 @@ class TLB
     int nEvictions;
     int nFlush;
     int nFlushEvictions;
-    std::vector<uint64_t> temp;
+                          //PID       vPage     pPage
+    std::vector<std::tuple<uint64_t, uint64_t, uint64_t>> Buffer;
+    uint64_t ASID = 0;
+    bool ASIDEnabled = true;
 
   public:
     TLB(const size_t nEntries, const MMU &mmu);
@@ -54,6 +57,13 @@ class TLB
     /* This method should yield all TLB statistics */
     void getStatistics(int &nLookups, int &nHits, int &nEvictions,
                        int &nFlush, int &nFlushEvictions) const;
+
+    void setASID(uint64_t newASID);
+
+    void setASIDEnabled(bool enable);
+    bool getASIDEnabled(){
+      return ASIDEnabled;
+    }
 };
 
 class MMU
@@ -61,6 +71,7 @@ class MMU
   protected:
     uintptr_t root;
     PageFaultFunction pageFaultHandler;
+    TLB tlb;
 
   public:
     MMU();
@@ -92,6 +103,22 @@ class MMU
     virtual bool performTranslation(const uint64_t vPage,
                                     uint64_t &pPage,
                                     bool isWrite) = 0;
+
+    void setASID(uint64_t newASID){
+      tlb.setASID(newASID);
+    }
+
+    void setASIDEnabled(bool enable){
+      tlb.setASIDEnabled(enable);
+    }
+
+    bool getASIDEnabled(){
+      return tlb.getASIDEnabled();
+    }
+
+    void flush(){
+      tlb.flush();
+    }
 };
 
 
