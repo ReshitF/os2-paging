@@ -6,6 +6,10 @@
  * Copyright (C) 2017-2020  Leiden University, The Netherlands.
  */
 
+// Authors:
+// R. Fazlija (s3270831)
+// A. Kooiker (s2098199)
+
 #include "AArch64.h"
 using namespace AArch64;
 
@@ -31,17 +35,19 @@ AArch64MMU::performTranslation(const uint64_t vPage,
   if ((root & (pageTableAlign - 1)) != 0)
     throw std::runtime_error("Unaligned page table access");
 
+  // Helper variables to decode the addres for the page walk
   const uint64_t mask = (1 << 11) -1;             // 11-bit bitmask
   const uint64_t level_3 = vPage & mask;          // bits 0-10
   const uint64_t level_2 = (vPage >> 11) & mask;  // bits 11-21
   const uint64_t level_1 = (vPage >> 22) & mask;  // bits 22-32
   const uint64_t level_0 = (vPage >> 33) & 1;     // bit 33
 
-  
   TableEntry *Table_0 = reinterpret_cast<TableEntry*>(root);
   if (Table_0[level_0].valid == 0)
     return false;
 
+  // Here the reinterpret cast of the driver is reversed and 
+  // the physicalPage is left shifted to get a full pointer to the next level 
   TableEntry *Table_1 = reinterpret_cast<TableEntry*>(Table_0[level_0].physicalPage << pageBits);
   if (Table_1[level_1].valid == 0)
     return false;
@@ -59,11 +65,11 @@ AArch64MMU::performTranslation(const uint64_t vPage,
   return true;
 }
 
+// The code below facilitates the TLB functionality
 TLB::TLB(const size_t nEntries, const MMU &mmu):
           nEntries(nEntries), mmu(mmu), nLookups(0),
           nHits(0), nEvictions(0), nFlush(0), nFlushEvictions(0),
-          Buffer({})
-{
+          Buffer({}){
 }
 
 TLB::~TLB(){

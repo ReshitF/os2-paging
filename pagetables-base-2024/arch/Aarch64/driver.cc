@@ -6,6 +6,11 @@
  * Copyright (C) 2017-2020  Leiden University, The Netherlands.
  */
 
+// Authors:
+// R. Fazlija (s3270831)
+// A. Kooiker (s2098199)
+
+
 #include "AArch64.h"
 using namespace AArch64;
 
@@ -80,6 +85,7 @@ AArch64MMUDriver::allocatePageTable(const uint64_t PID)
 void
 AArch64MMUDriver::releasePageTable(const uint64_t PID)
 {
+  // Depth-first iteration through the tree and release on returning
   for (int it0 = 0; it0 < 2; it0++){
     TableEntry *Table_0 = pageTables[PID];
     if (Table_0[it0].valid == 1){
@@ -104,6 +110,7 @@ AArch64MMUDriver::releasePageTable(const uint64_t PID)
       kernel->releaseMemory(reinterpret_cast<void*>(Table_0[it0].physicalPage << pageBits), entries*sizeof(TableEntry));
     }
   }
+  // Delete the first two entries on level0:
   auto it = pageTables.find(PID);
   kernel->releaseMemory(it->second, 2 * sizeof(TableEntry));
   pageTables.erase(it);
@@ -133,6 +140,10 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
   const uint64_t level_1 = (vPage >> 22) & mask;  // bits 22-32
   const uint64_t level_0 = (vPage >> 33) & 1;     // bit 33 
 
+  // Allocation is done on demand for each level
+  // The table entries are reinterpreted as actual pointers to make up the tree structure
+  // In order to do this, the rightmost 14 bits are discarded, since they are empty due to page allignment
+  // The remaining 48-14=34 bits fit inside the physicalPage-field of the TableEntry's
   TableEntry *Table_0 = pageTables[PID];
   if (Table_0[level_0].valid == 0){
     TableEntry *table = reinterpret_cast<TableEntry *>

@@ -5,6 +5,11 @@
  * Copyright (C) 2017-2020  Leiden University, The Netherlands.
  */
 
+// Authors:
+// R. Fazlija (s3270831)
+// A. Kooiker (s2098199)
+
+
 #include "oskernel.h"
 #include "physmemmanager.h"
 #include "settings.h"
@@ -126,8 +131,6 @@ OSKernel::terminateProcess(const uint64_t PID)
 {
   std::cerr << "KERNEL: process " << PID << " has finished." << std::endl;
 
-  /* TODO: release all physical pages allocated by this process. */
-
   /* Ask driver to release page tables */
   driver.releasePageTable(PID);
 }
@@ -190,6 +193,7 @@ OSKernel::interruptHandler(InterruptRequest request)
           // Set ASID for TLB, and flush if necessary
           processor.getMMU().setASIDEnabled(true);
           processor.getMMU().setASID(current->getPID());
+          // TLB is flushed on context switch if ASID is enabled
           if (!processor.getMMU().getASIDEnabled()){
             processor.getMMU().flush();
           }

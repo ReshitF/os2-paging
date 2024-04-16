@@ -5,6 +5,10 @@
  * Copyright (C) 2022  Leiden University, The Netherlands.
  */
 
+// Authors:
+// R. Fazlija (s3270831)
+// A. Kooiker (s2098199)
+
 #define BOOST_TEST_MODULE AArch64
 #include <boost/test/unit_test.hpp>
 

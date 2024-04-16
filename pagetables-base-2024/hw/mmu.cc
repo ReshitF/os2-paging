@@ -102,8 +102,5 @@ void
 MMU::getTLBStatistics(int &nLookups, int &nHits, int &nEvictions,
                       int &nFlush, int &nFlushEvictions)
 {
-  /* TODO: connect this to your TLB implementation to fill in the
-   * appropriate values for the statistics.
-   */
   tlb.getStatistics(nLookups, nHits, nEvictions, nFlush, nFlushEvictions);
 }

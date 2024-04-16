@@ -5,6 +5,11 @@
  * Copyright (C) 2017-2020 Leiden University, The Netherlands.
  */
 
+// Authors:
+// R. Fazlija (s3270831)
+// A. Kooiker (s2098199)
+
+
 #ifndef __ARCH_AARCH64__
 #define __ARCH_AARCH64__
 
@@ -20,18 +25,14 @@ namespace AArch64 {
  */
 const static uint64_t addressSpaceBits = 48;
 
-
 /* Table entry definitions and assorted constants. */
-
 const static uint64_t pageBits = 14; /* 16 KiB / page */
 const static uint64_t pageSize = 1UL << pageBits;
 
 /* Page tables contain 2^10 entries and are 2^12 bytes in size.
  * log2(sizeof(TableEntry)) = 2.
  */
-// const static uint64_t pageTableAlign = 1UL << (addressSpaceBits - pageBits + 2);
 const static uint64_t pageTableAlign = pageSize;
-
 
 struct __attribute__ ((__packed__)) TableEntry
 {
