@@ -35,7 +35,7 @@ getAddress(TableEntry &entry)
  * organizing the page tables.
  */
 
-const static uint64_t entries = 1UL << (addressSpaceBits - pageBits);
+const static uint64_t entries = 2048;
 
 AArch64MMUDriver::AArch64MMUDriver()
   : pageTables(), bytesAllocated(0), kernel(nullptr)
@@ -68,7 +68,6 @@ AArch64MMUDriver::allocatePageTable(const uint64_t PID)
   TableEntry *table = reinterpret_cast<TableEntry *>
       (kernel->allocateMemory(2 * sizeof(TableEntry), pageTableAlign));
   bytesAllocated += 2 * sizeof(TableEntry);
-  std::cout << "TABLE ENTRY SIZE: " << sizeof(TableEntry) << "\n";
 
   for (int i = 0; i < 2; ++i) {
     table[i].valid = 0;
@@ -85,24 +84,24 @@ AArch64MMUDriver::releasePageTable(const uint64_t PID)
     TableEntry *Table_0 = pageTables[PID];
     if (Table_0[it0].valid == 1){
       TableEntry *Table_1 = reinterpret_cast<TableEntry*>(Table_0[it0].physicalPage << pageBits);
-      for (int it1 = 0; it1 < 2048; it1++){
+      for (int it1 = 0; it1 < (int)entries; it1++){
         if (Table_1[it1].valid == 1){
           TableEntry *Table_2 = reinterpret_cast<TableEntry*>(Table_1[it1].physicalPage << pageBits);
-          for (int it2 = 0; it2 < 2048; it2++){
+          for (int it2 = 0; it2 < (int)entries; it2++){
             if (Table_2[it2].valid == 1){
               TableEntry *Table_3 = reinterpret_cast<TableEntry*>(Table_2[it2].physicalPage << pageBits);
-              for (int it3 = 0; it3 < 2048; it3++){
+              for (int it3 = 0; it3 < (int)entries; it3++){
                 if (Table_3[it3].valid == 1){
                   kernel->releaseMemory(reinterpret_cast<void*>(&Table_3[it3]), 1 * sizeof(TableEntry));
                 }
               }
-              kernel->releaseMemory(reinterpret_cast<void*>(Table_2[it2].physicalPage << pageBits), 2048 * sizeof(TableEntry));
+              kernel->releaseMemory(reinterpret_cast<void*>(Table_2[it2].physicalPage << pageBits), entries * sizeof(TableEntry));
             }
           }
-          kernel->releaseMemory(reinterpret_cast<void*>(Table_1[it1].physicalPage << pageBits), 2048 * sizeof(TableEntry));
+          kernel->releaseMemory(reinterpret_cast<void*>(Table_1[it1].physicalPage << pageBits), entries * sizeof(TableEntry));
         }
       }
-      kernel->releaseMemory(reinterpret_cast<void*>(Table_0[it0].physicalPage << pageBits), 2048*sizeof(TableEntry));
+      kernel->releaseMemory(reinterpret_cast<void*>(Table_0[it0].physicalPage << pageBits), entries*sizeof(TableEntry));
     }
   }
   auto it = pageTables.find(PID);
@@ -138,8 +137,8 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
   TableEntry *Table_0 = pageTables[PID];
   if (Table_0[level_0].valid == 0){
     TableEntry *table = reinterpret_cast<TableEntry *>
-      (kernel->allocateMemory(2048 * sizeof(TableEntry), pageTableAlign));
-    bytesAllocated += 2048 * sizeof(TableEntry);
+      (kernel->allocateMemory(entries * sizeof(TableEntry), pageTableAlign));
+    bytesAllocated += entries * sizeof(TableEntry);
     Table_0[level_0].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
     Table_0[level_0].valid = 1;
     // std::cout << "0, ";
@@ -148,8 +147,8 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
   TableEntry *Table_1 = reinterpret_cast<TableEntry*>(Table_0[level_0].physicalPage << pageBits);
   if (Table_1[level_1].valid == 0){
     TableEntry *table = reinterpret_cast<TableEntry *>
-      (kernel->allocateMemory(2048 * sizeof(TableEntry), pageTableAlign));
-    bytesAllocated += 2048 * sizeof(TableEntry);
+      (kernel->allocateMemory(entries * sizeof(TableEntry), pageTableAlign));
+    bytesAllocated += entries * sizeof(TableEntry);
     Table_1[level_1].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
     Table_1[level_1].valid = 1;
     // std::cout << "1, ";
@@ -158,8 +157,8 @@ AArch64MMUDriver::setMapping(const uint64_t PID,
 
   if (Table_2[level_2].valid == 0){
     TableEntry *table = reinterpret_cast<TableEntry *>
-      (kernel->allocateMemory(2048 * sizeof(TableEntry), pageTableAlign));
-    bytesAllocated += 2048 * sizeof(TableEntry);
+      (kernel->allocateMemory(entries * sizeof(TableEntry), pageTableAlign));
+    bytesAllocated += entries * sizeof(TableEntry);
     Table_2[level_2].physicalPage = reinterpret_cast<uint64_t>(table) >> pageBits;
     Table_2[level_2].valid = 1;
     // std::cout << "2, ";
