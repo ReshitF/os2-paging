@@ -99,6 +99,7 @@ void
 TLB::flush(void){
   nFlush++;
   nFlushEvictions += Buffer.size();
+  nEvictions += Buffer.size();
   Buffer.clear();
 }
 
