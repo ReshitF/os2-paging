@@ -84,7 +84,6 @@ MMU::getTranslation(const MemAccess &access, uint64_t &pAddr)
                   access.type == MemAccessType::Modify);
 
   /* TODO: your TLB likely needs to be glued in somewhere in this method */
-
   if (performTranslation(vPage, pPage, isWrite))
     {
       pAddr = makePhysicalAddr(access, pPage);

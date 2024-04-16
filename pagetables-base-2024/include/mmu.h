@@ -9,6 +9,7 @@
 #define __MMU_H__
 
 #include <functional>
+#include <queue>
 
 #include "process.h" /* for MemAccess */
 
@@ -32,6 +33,7 @@ class TLB
     int nEvictions;
     int nFlush;
     int nFlushEvictions;
+    std::vector<uint64_t> temp;
 
   public:
     TLB(const size_t nEntries, const MMU &mmu);

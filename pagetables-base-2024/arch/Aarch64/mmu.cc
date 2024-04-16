@@ -58,3 +58,39 @@ AArch64MMU::performTranslation(const uint64_t vPage,
 
   return true;
 }
+
+TLB::TLB(const size_t nEntries, const MMU &mmu):
+          nEntries(nEntries), mmu(mmu), nLookups(0),
+          nHits(0), nEvictions(0), nFlush(0), nFlushEvictions(0),
+          temp({})
+{
+}
+
+TLB::~TLB(){
+}
+
+bool
+TLB::lookup(const uint64_t vPage, uint64_t &pPage){
+  return true;
+}
+
+void
+TLB::add(const uint64_t vPage, const uint64_t pPage){
+
+}
+
+void
+TLB::flush(void){
+
+}
+
+void
+TLB::clear(void){
+
+}
+
+void
+TLB::getStatistics(int &nLookups, int &nHits, int &nEvictions,
+                       int &nFlush, int &nFlushEvictions) const{
+
+}
